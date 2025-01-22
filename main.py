@@ -1,5 +1,5 @@
-from typing import Optional, Union
-from fastapi import Body, FastAPI
+from typing import Optional
+from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from random import randrange
 
@@ -36,6 +36,7 @@ class Item(BaseModel):
     published: bool = True # Valor por defecto (esto tiene el efecto de actuar como un campo opcional)
     rating: Optional[int] = None # Campo opcional
 
+
 @app.get("/")
 def read_root():
     return {"Message": "Hello World Again!!"}
@@ -49,11 +50,16 @@ def read_items():
 @app.get("/items/{item_id}")
 def read_item(item_id: int): # Al especificar el tipo, Fastapi parsea y genera validaciones automáticamente
     item = find_item(item_id)
+    if not item:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = f"Item with id {item_id} was not found"
+        )
     return {"item_detail": item}
 
 
 # Instrucciones del video-tutorial de Sanjeev Thiyagarajan
-@app.post("/items/new-item")
+@app.post("/items/new-item", status_code=status.HTTP_201_CREATED)
 def create_item(new_item: Item):
     print(new_item) # Pydantic model
     new_item_dict = new_item.model_dump() # Generate a dictionary representation of the model, optionally specifying which fields to include or exclude.
