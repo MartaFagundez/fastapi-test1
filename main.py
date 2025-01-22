@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 from random import randrange
 
@@ -27,6 +27,12 @@ def find_item(id):
     for item in my_items:
         if item["id"] == id:
             return item
+
+
+def find_index(id):
+    for item in my_items:
+        if item["id"] == id:
+            return my_items.index(item)
 
 
 # Schema Validation with Pydantic
@@ -66,3 +72,16 @@ def create_item(new_item: Item):
     new_item_dict["id"] = randrange(0, 10000)
     my_items.append(new_item_dict)
     return { "new_item": new_item_dict}
+
+
+# Temporal delete implementation with the fake database
+@app.delete("/items/{id}", status_code=status.HTTP_404_NOT_FOUND)
+def delete_item(id: int):
+    index = find_index(id)
+    if index == None:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND, 
+            detail = f"Post with id {id} does not exist"
+        )
+    my_items.pop(index)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
