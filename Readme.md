@@ -65,7 +65,7 @@ pip install -r requirements.txt
 Inicia el servidor local con el siguiente comando:
 
 ```bash
-fastapi dev main.py
+fastapi dev src/main.py
 ```
 
 La API estará disponible en:
