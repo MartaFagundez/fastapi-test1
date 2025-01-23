@@ -81,7 +81,25 @@ def delete_item(id: int):
     if index == None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND, 
-            detail = f"Post with id {id} does not exist"
+            detail = f"Item with id {id} does not exist"
         )
     my_items.pop(index)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# Temporal update implementation with the fake database
+@app.put("/items/{id}")
+def update_item(id: int, item: Item):
+    index = find_index(id)
+
+    if index == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Item with id {id} does not exist"
+        )
+    
+    item_dict = item.model_dump()
+    item_dict["id"] = id
+    my_items[index] = item_dict
+
+    return {"updated_item": my_items[index]}
